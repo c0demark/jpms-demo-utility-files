@@ -1,0 +1,98 @@
+Java Platform Module System
+---------------------------
+	Restrictions
+	------------
+		1. No circular dependencies
+		2. No split packages
+		3. If a package is exported by a named module, but also found in the unnamed module, the package from the named module will be used
+		
+	Type of Modules
+	---------------
+		A. Named Modules
+		----------------
+		1. includes "module-info.java" module descriptor file at module-root directory.
+		2. has to be given a name as per java package naming conventions.
+		3. can specify which packages to export for other modules to use.
+		4. must specify required modules to use package contents ( classes, interfaces, enums )
+		   from other modules.
+		5. cannot use packages included in the classpath ( unnamed module ).
+		
+		B. Automatic Modules
+		--------------------
+		1. non-modular jar files ( does not have "module-info.java" module descriptor file ) added to module-path.
+		2. module name is derived from the jar file name and transforming it to follow java package naming conventions
+		   or author may mention the name with key as "Automatic-Module-Name" in MANIFEST.MF file under META-INF directory.
+		3. does not specify which packages to export so by default exports all the packages.
+		4. does not specify required modules so by default requires all named modules from the module-path.
+		5. can use packages included in the classpath ( unnamed module ).
+		
+		C. Unnamed Modules
+		------------------
+		1. all the class files included in the classpath.
+		2. no specified module name.
+		3. does not specify which packages to export so by default exports all the packages.
+		   but no named module can access its packages only unnamed modules can use its packages.
+		4. does not specify required modules so by default requires all modules ( named and automatic ) from the module-path.
+		5. can use packages included in the module-path by named modules (only exported packages by named modules) and automatic modules ( automatic module exports all packages by default).
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+setjava11
+jdeps -version
+jdeps -help
+jdeps -classpath <path-1[;path-2;path-3...]> -verbose -dotoutput . <src-1[ src-2 src-3...]>
+jdeps -classpath <path-1[;path-2;path-3...]> -verbose --multi-release 11 -dotoutput . <src-1[ src-2 src-3...]>
+jdeps -classpath <path-1[;path-2;path-3...]> -verbose -recursive -dotoutput . <src-1[ src-2 src-3...]>
+jdeps -classpath <path-1[;path-2;path-3...]> -verbose -recursive --multi-release 11 -dotoutput . <src-1[ src-2 src-3...]>
+
+Example
+-------
+jdeps -classpath D:/mycompany/demoapp/localbak/demoapp-eclipse-2018-12-tomcat-jdk11/wtpwebapps/demoapp/WEB-INF/lib/*;C:/DevInstalls/apache/tomcat/apache-tomcat-8.5.35_demoapp_container/lib/* -verbose -dotoutput . ./WEB-INF/classes ./WEB-INF/test-cases
+jdeps -classpath D:/mycompany/demoapp/localbak/demoapp-eclipse-2018-12-tomcat-jdk11/wtpwebapps/demoapp/WEB-INF/lib/*;C:/DevInstalls/apache/tomcat/apache-tomcat-8.5.35_demoapp_container/lib/* -verbose --multi-release 11 -dotoutput . ./WEB-INF/classes ./WEB-INF/test-cases
+jdeps -classpath D:/mycompany/demoapp/localbak/demoapp-eclipse-2018-12-tomcat-jdk11/wtpwebapps/demoapp/WEB-INF/lib/*;C:/DevInstalls/apache/tomcat/apache-tomcat-8.5.35_demoapp_container/lib/* -verbose -recursive -dotoutput . ./WEB-INF/classes ./WEB-INF/test-cases
+jdeps -classpath D:/mycompany/demoapp/localbak/demoapp-eclipse-2018-12-tomcat-jdk11/wtpwebapps/demoapp/WEB-INF/lib/*;C:/DevInstalls/apache/tomcat/apache-tomcat-8.5.35_demoapp_container/lib/* -verbose -recursive --multi-release 11 -dotoutput . ./WEB-INF/classes ./WEB-INF/test-cases
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\javac" --source-path src\com.practice.nonmodular.msglib src\com.practice.nonmodular.msglib\com\practice\nonmodular\msglib\*.java -d bin\com.practice.nonmodular.msglib
+ 
+ 
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\jar" --create --file=lib\nonmodular-msglib.jar -C bin\com.practice.nonmodular.msglib .
+ 
+ 
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\javac" --class-path bin\com.practice.nonmodular.msglib --source-path src\com.practice.nonmodular.printlib src\com.practice.nonmodular.printlib\com\practice\nonmodular\printlib\*.java -d bin\com.practice.nonmodular.printlib
+  
+  
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\jar" --create --file=lib\nonmodular-printlib.jar -C bin\com.practice.nonmodular.printlib .
+
+
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\javac" --class-path=bin\com.practice.nonmodular.msglib;bin\com.practice.nonmodular.printlib --source-path src\com.practice.nonmodular.ui src\com.practice.nonmodular.ui\com\practice\nonmodular\ui\*.java -d bin\com.practice.nonmodular.ui
+
+
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\jar" --create --file=lib\nonmodular-ui.jar --main-class=com.practice.nonmodular.ui.MainUI -C bin\com.practice.nonmodular.ui .
+
+
+"C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin\java" -classpath lib\nonmodular-msglib.jar;lib\nonmodular-printlib.jar;lib\nonmodular-ui.jar -jar lib\nonmodular-ui.jar
+
+
+
+javac -sourcepath src\com.practice.nonmodular.msglib src\com.practice.nonmodular.msglib\com\practice\nonmodular\msglib\*.java -d bin\com.practice.nonmodular.msglib
+
+jar -cf lib\nonmodular-msglib.jar -C bin\com.practice.nonmodular.msglib .
+
+javac -classpath bin\com.practice.nonmodular.msglib -sourcepath src\com.practice.nonmodular.printlib src\com.practice.nonmodular.printlib\com\practice\nonmodular\printlib\*.java -d bin\com.practice.nonmodular.printlib
+
+jar -cf lib\nonmodular-printlib.jar -C bin\com.practice.nonmodular.printlib .
+
+javac -classpath bin\com.practice.nonmodular.msglib;bin\com.practice.nonmodular.printlib -sourcepath src\com.practice.nonmodular.ui src\com.practice.nonmodular.ui\com\practice\nonmodular\ui\*.java -d bin\com.practice.nonmodular.ui
+
+jar -cfe lib\nonmodular-ui.jar com.practice.nonmodular.ui.MainUI -C bin\com.practice.nonmodular.ui .
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
